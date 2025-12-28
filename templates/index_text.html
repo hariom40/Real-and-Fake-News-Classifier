@@ -1,48 +1,298 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<style>
-h1 {text-align: center;
-    color:#7689de;
-    }
-body{ background-image: url(../static/image_back.jpeg);
-      background-size: cover;
-      background-repeat: no-repeat, repeat;
-      justify-content : center;
-    }
-input[type="text"] {
-    color = "white";
-    
-                    }   
-button{ 
-} 
-.box{
-     text-align: center;
-     
-     
-    }
-</style>
-<title>Detecting Fake News with Python and Machine Learning</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fake News Detector - AI-Powered Analysis</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%23ffffff" fill-opacity="0.1" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,112C672,96,768,96,864,112C960,128,1056,160,1152,165.3C1248,171,1344,149,1392,138.7L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>');
+            background-size: cover;
+            background-position: bottom;
+            pointer-events: none;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 800px;
+            width: 100%;
+            padding: 50px;
+            position: relative;
+            animation: slideUp 0.6s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header i {
+            font-size: 60px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 15px;
+        }
+
+        .header h1 {
+            font-size: 36px;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 16px;
+            color: #718096;
+            font-weight: 400;
+        }
+
+        .form-group {
+            margin-bottom: 30px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 15px;
+            font-weight: 600;
+            color: #1a202c;
+            margin-bottom: 10px;
+        }
+
+        .textarea-wrapper {
+            position: relative;
+        }
+
+        .form-group textarea {
+            width: 100%;
+            padding: 20px;
+            font-size: 16px;
+            font-family: 'Poppins', sans-serif;
+            border: 2px solid #cbd5e0;
+            border-radius: 15px;
+            resize: vertical;
+            min-height: 150px;
+            transition: all 0.3s ease;
+            background: #ffffff;
+            color: #000000;
+        }
+
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-group textarea::placeholder {
+            color: #718096;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 18px;
+            font-size: 18px;
+            font-weight: 600;
+            color: white;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.4);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+
+        .result-container {
+            margin-top: 30px;
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .result-fake {
+            background: linear-gradient(135deg, #fc5c7d 0%, #e91e63 100%);
+            box-shadow: 0 10px 30px rgba(252, 92, 125, 0.3);
+        }
+
+        .result-true {
+            background: linear-gradient(135deg, #56ab2f 0%, #a8e063 100%);
+            box-shadow: 0 10px 30px rgba(86, 171, 47, 0.3);
+        }
+
+        .result-container i {
+            font-size: 50px;
+            color: white;
+            margin-bottom: 15px;
+        }
+
+        .result-container h2 {
+            font-size: 32px;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 10px;
+        }
+
+        .result-container p {
+            font-size: 16px;
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 400;
+        }
+
+        .info-box {
+            background: #edf2f7;
+            padding: 15px 20px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .info-box i {
+            font-size: 24px;
+            color: #667eea;
+        }
+
+        .info-box p {
+            font-size: 14px;
+            color: #1a202c;
+            margin: 0;
+            font-weight: 500;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 30px 20px;
+            }
+
+            .header h1 {
+                font-size: 28px;
+            }
+
+            .header i {
+                font-size: 50px;
+            }
+
+            .result-container h2 {
+                font-size: 26px;
+            }
+        }
+    </style>
 </head>
 <body>
-<form  action="/predict" method="POST">
-<div class="box">
-<h1> Detecting Fake News</h1>
-<input  name="message" style= "width:500px" placeholder = "Please Enter The News" /><br/>
-<button value="predict">Submit</button>
-<div/>
-</form>
+    <div class="container">
+        <div class="header">
+            <i class="fas fa-newspaper"></i>
+            <h1>Fake News Detector</h1>
+            <p>Powered by Machine Learning & AI</p>
+        </div>
 
+        <div class="info-box">
+            <i class="fas fa-info-circle"></i>
+            <p>Enter or paste a news article below to analyze its authenticity using our advanced AI model.</p>
+        </div>
 
+        <form action="/predict" method="POST">
+            <div class="form-group">
+                <label for="message">
+                    <i class="fas fa-edit"></i> News Article Text
+                </label>
+                <div class="textarea-wrapper">
+                    <textarea 
+                        name="message" 
+                        id="message" 
+                        placeholder="Paste the news article or headline here..."
+                        required
+                    ></textarea>
+                </div>
+            </div>
 
-{% if pred ==[0] %} 
-<h2 style="color: green;"> Fack News</h2>
-{% endif %}
+            <button type="submit" class="submit-btn">
+                <i class="fas fa-search"></i>
+                Analyze News Article
+            </button>
+        </form>
 
-{% if pred ==[1] %} 
-<h2 style="color: green;"> True News</h2>
-{% endif %}
+        {% if pred == [0] %}
+        <div class="result-container result-fake">
+            <i class="fas fa-exclamation-triangle"></i>
+            <h2>Fake News Detected!</h2>
+            <p>Our AI model has identified this content as potentially false or misleading.</p>
+        </div>
+        {% endif %}
 
+        {% if pred == [1] %}
+        <div class="result-container result-true">
+            <i class="fas fa-check-circle"></i>
+            <h2>Likely Authentic News</h2>
+            <p>Our AI model has identified this content as likely to be true and reliable.</p>
+        </div>
+        {% endif %}
+    </div>
 </body>
-
 </html>

@@ -1,128 +1,255 @@
 import streamlit as st
 import pickle
 from sklearn.linear_model import LogisticRegression
-import base64   
 
 # Load the pre-trained model and vectorizer
 model = pickle.load(open('pred.pkl', 'rb'))
 vector = pickle.load(open('tfidf.pkl', 'rb'))
 
 # Set Streamlit page config
-st.set_page_config(page_title="Fake News Detection", layout="centered")
+st.set_page_config(
+    page_title="Fake News Detector - AI Powered",
+    page_icon="📰",
+    layout="centered",
+    initial_sidebar_state="collapsed"
+)
 
-# Function to add background image
-def add_bg_from_local(image_file):
-    with open(image_file, "rb") as image_file:
-        encoded_string = base64.b64encode(image_file.read())
-    st.markdown(
-    f"""
-    <style>
-    .stApp {{
-        background-image: url(data:image/{"jpg"};base64,{encoded_string.decode()});
-        background-size: cover;
-        background-attachment: fixed;
-    }}
-    .main {{
-        background-color: rgba(255, 255, 255, 0.9);
-        padding: 2rem;
-        border-radius: 15px;
-        margin-top: 2rem;
-    }}
-    </style>
-    """,
-    unsafe_allow_html=True
-    )
-
-# Add background image (replace with your image path)
-add_bg_from_local('news_background.jpg')  # You need to have this image in your directory
-
-# Apply Custom CSS for Styling
+# Apply Custom CSS for Modern Styling
 st.markdown("""
     <style>
-        .title {
-            font-size: 42px !important;
-            color: #2c3e50 !important;
-            text-align: center;
-            margin-bottom: 20px;
-            color: #00f108 !important;
+        /* Import Google Fonts */
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        
+        /* Main App Background */
+        .stApp {
+            background: black;
+            font-family: 'Poppins', sans-serif;
         }
-        .description {
+        
+        /* Main Container */
+        .main {
+            background-color: rgba(255, 255, 255, 0.95);
+            padding: 3rem 2.5rem;
+            border-radius: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            margin-top: 2rem;
+        }
+        
+        /* Hide Streamlit Branding */
+        #MainMenu {visibility: hidden;}
+        footer {visibility: hidden;}
+        header {visibility: hidden;}
+        
+        /* Title Styling */
+        .title {
+            font-size: 48px !important;
+            font-weight: 700 !important;
+            text-align: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px !important;
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        /* Subtitle */
+        .subtitle {
             font-size: 18px;
-            color: #34495e;
+            color: #718096;
             text-align: center;
             margin-bottom: 30px;
-            color: #00f108 !important;
+            font-weight: 400;
         }
-        .result-true { 
-            color: #27ae60; 
-            font-size: 28px; 
-            font-weight: bold;
-            text-align: center;
-            padding: 15px;
-            background-color: rgba(39, 174, 96, 0.1);
-            border-radius: 10px;
-            margin-top: 20px;
+        
+        /* Info Box */
+        .info-box {
+            background: linear-gradient(135deg, #edf2f7 0%, #e2e8f0 100%);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            border-left: 5px solid #667eea;
         }
-        .result-fake { 
-            color: #e74c3c; 
-            font-size: 28px; 
-            font-weight: bold;
-            text-align: center;
-            padding: 15px;
-            background-color: rgba(231, 76, 60, 0.1);
-            border-radius: 10px;
-            margin-top: 20px;
+        
+        .info-box p {
+            color: #1a202c;
+            font-size: 15px;
+            margin: 0;
+            line-height: 1.6;
+            font-weight: 500;
         }
+        
+        /* Text Area Styling */
+        .stTextArea label {
+            font-size: 16px !important;
+            font-weight: 600 !important;
+            color: #1a202c !important;
+            margin-bottom: 10px !important;
+        }
+        
         .stTextArea textarea {
-            border: 2px solid #3498db !important;
-            border-radius: 10px !important;
-            padding: 10px !important;
+            border: 2px solid #e2e8f0 !important;
+            border-radius: 15px !important;
+            padding: 20px !important;
+            font-size: 16px !important;
+            font-family: 'Poppins', sans-serif !important;
+            background-color: #ffffff !important;
+            color: #1a202c !important;
+            transition: all 0.3s ease !important;
         }
-        .stButton>button {
-            background-color: #3498db !important;
+        
+        .stTextArea textarea:focus {
+            border-color: #667eea !important;
+            background-color: white !important;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1) !important;
+        }
+        
+        /* Button Styling */
+        .stButton > button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
             color: white !important;
-            border-radius: 8px !important;
-            padding: 10px 24px !important;
+            border-radius: 15px !important;
+            padding: 18px 24px !important;
             font-size: 18px !important;
+            font-weight: 600 !important;
             border: none !important;
-            width: 100%;
-            transition: all 0.3s;
+            width: 100% !important;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3) !important;
+            transition: all 0.3s ease !important;
+            font-family: 'Poppins', sans-serif !important;
         }
-        .stButton>button:hover {
-            background-color: #2980b9 !important;
-            transform: scale(1.02);
+        
+        .stButton > button:hover {
+            transform: translateY(-2px) !important;
+            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.4) !important;
         }
-        .st-emotion-cache-mtjnbi {
-            background-color: #00000087 !important;
-            border-radius: 20% !important;
+        
+        .stButton > button:active {
+            transform: translateY(0) !important;
+        }
+        
+        /* Result Box - True News */
+        .result-true {
+            background: linear-gradient(135deg, #56ab2f 0%, #a8e063 100%);
+            color: white;
+            font-size: 28px;
+            font-weight: 700;
+            text-align: center;
+            padding: 30px;
+            border-radius: 20px;
+            margin-top: 30px;
+            box-shadow: 0 10px 30px rgba(86, 171, 47, 0.3);
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .result-true-subtitle {
+            font-size: 16px;
+            font-weight: 400;
+            margin-top: 10px;
+            color: rgba(255, 255, 255, 0.95);
+        }
+        
+        /* Result Box - Fake News */
+        .result-fake {
+            background: linear-gradient(135deg, #fc5c7d 0%, #e91e63 100%);
+            color: white;
+            font-size: 28px;
+            font-weight: 700;
+            text-align: center;
+            padding: 30px;
+            border-radius: 20px;
+            margin-top: 30px;
+            box-shadow: 0 10px 30px rgba(252, 92, 125, 0.3);
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .result-fake-subtitle {
+            font-size: 16px;
+            font-weight: 400;
+            margin-top: 10px;
+            color: rgba(255, 255, 255, 0.95);
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        
+        /* Warning Message */
+        .stAlert {
+            border-radius: 15px !important;
+            border-left: 5px solid #f59e0b !important;
         }
     </style>
 """, unsafe_allow_html=True)
 
-# Main content container
-st.markdown("<div class='main'>", unsafe_allow_html=True)
-
-# Title and Description
+# Header Section
 st.markdown("<h1 class='title'>📰 Fake News Detector</h1>", unsafe_allow_html=True)
-st.markdown("<p class='description'>Analyze news articles or headlines to determine their authenticity using AI</p>", unsafe_allow_html=True)
+st.markdown("<p class='subtitle'>Powered by Machine Learning & AI</p>", unsafe_allow_html=True)
 
-# Input text area
-message = st.text_area("", placeholder="Paste news content here...", height=200)
+# Info Box
+st.markdown("""
+    <div class='info-box'>
+        <p>🔍 <strong>How it works:</strong> Enter or paste a news article below to analyze its authenticity. 
+        Our AI model will evaluate the content and determine if it's likely to be genuine or fake news.</p>
+    </div>
+""", unsafe_allow_html=True)
 
-# Predict button
-if st.button("Analyze News Authenticity"):
+# Input Section
+st.markdown("### 📝 News Article Text")
+message = st.text_area(
+    "", 
+    placeholder="Paste the news article or headline here...",
+    height=200,
+    label_visibility="collapsed"
+)
+
+# Analyze Button
+col1, col2, col3 = st.columns([1, 2, 1])
+with col2:
+    analyze_button = st.button("🔎 Analyze News Article")
+
+# Prediction Logic
+if analyze_button:
     if message.strip():
-        transformed_message = vector.transform([message])
-        output = model.predict(transformed_message)[0]
-        
-        # Display result with animation
-        if output == 1:
-            st.markdown("<p class='result-true'>✅ Genuine News Content</p>", unsafe_allow_html=True)
-            st.balloons()
-        else:
-            st.markdown("<p class='result-fake'>❌ Potential Fake News</p>", unsafe_allow_html=True)
-            st.snow()
+        with st.spinner("🤖 Analyzing with AI..."):
+            transformed_message = vector.transform([message])
+            output = model.predict(transformed_message)[0]
+            
+            # Display result
+            if output == 1:
+                st.markdown("""
+                    <div class='result-true'>
+                        ✅ Likely Authentic News
+                        <div class='result-true-subtitle'>
+                            Our AI model has identified this content as likely to be true and reliable.
+                        </div>
+                    </div>
+                """, unsafe_allow_html=True)
+                st.balloons()
+            else:
+                st.markdown("""
+                    <div class='result-fake'>
+                        ⚠️ Fake News Detected!
+                        <div class='result-fake-subtitle'>
+                            Our AI model has identified this content as potentially false or misleading.
+                        </div>
+                    </div>
+                """, unsafe_allow_html=True)
+                st.snow()
     else:
-        st.warning("⚠ Please enter news content before analyzing")
+        st.warning("⚠️ Please enter news content before analyzing")
 
-st.markdown("</div>", unsafe_allow_html=True)
+# Footer
+st.markdown("<br><br>", unsafe_allow_html=True)
+st.markdown("""
+    <div style='text-align: center; color: #718096; font-size: 14px; padding: 20px;'>
+        💡 <em>Note: Results are based on machine learning predictions and should be verified with multiple sources.</em>
+    </div>
+""", unsafe_allow_html=True)
